@@ -3,16 +3,22 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { getPool, initSchema } from './db.js';
 
-// Only load .env file in local development (Azure uses Application Settings)
-if (process.env.NODE_ENV !== 'production') {
-  dotenv.config();
-}
+// Always load .env file - environment variables can be set via .env or system env
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Determine environment from APP_ENV or NODE_ENV (defaults to development)
+const isProduction = (process.env.APP_ENV || process.env.NODE_ENV) === 'production';
+
+// Use environment-specific CORS origin
+const corsOrigin = isProduction
+  ? (process.env.ALLOWED_ORIGIN || 'http://localhost:5173')
+  : (process.env.DEV_ORIGIN || 'http://localhost:5173');
+
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173',
+  origin: corsOrigin,
 }));
 app.use(express.json());
 
