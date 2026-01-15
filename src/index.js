@@ -46,9 +46,13 @@ app.put('/api/storage/:key', async (req, res) => {
     const pool = await getPool();
     const { value } = req.body;
 
+    // MySQL JSON columns require valid JSON text (string)
+    // Stringify the value to ensure it's in the correct format
+    const jsonString = typeof value === 'string' ? value : JSON.stringify(value);
+    
     await pool.query(
-      'INSERT INTO app_storage (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)',
-      [req.params.key, value],
+      'INSERT INTO app_storage (`key`, `value`) VALUES (?, CAST(? AS JSON)) ON DUPLICATE KEY UPDATE `value` = CAST(? AS JSON)',
+      [req.params.key, jsonString, jsonString],
     );
 
     res.json({ key: req.params.key, value });

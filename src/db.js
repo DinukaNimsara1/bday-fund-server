@@ -27,6 +27,9 @@ export async function getPool() {
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
+      ssl: {
+        rejectUnauthorized: false, // Set to true in production with proper CA certificate
+      },
     });
   }
   return pool;
